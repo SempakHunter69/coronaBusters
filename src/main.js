@@ -1,5 +1,6 @@
 import CoronaBusterScene from './scenes/CoronaBusterScene';
 import { AUTO, Scale, Game } from 'phaser';
+import GameOverScene from './scenes/GameOverScene';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -20,7 +21,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     scene: [
-        CoronaBusterScene
+        CoronaBusterScene, GameOverScene,
     ]
 };
 
