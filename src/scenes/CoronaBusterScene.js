@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import FallingObject from "./FallingObject";
 export default class CoronaBusterScene extends Phaser.Scene {
     constructor() {
         super("corona-buster-scene");
@@ -10,6 +11,8 @@ export default class CoronaBusterScene extends Phaser.Scene {
         this.shoot = false;
         this.player = undefined;
         this.speed = 100;
+        this.enemies = undefined;
+        this.enemySpeed = 50;
     }
 
     preload() {
@@ -22,6 +25,7 @@ export default class CoronaBusterScene extends Phaser.Scene {
             frameWidth: 66,
             frameHeight: 66,
         });
+        this.load.image('enemy', 'assets/enemy.png');
     }
     create() {
         const gameWidht = this.scale.width * 0.5;
@@ -35,7 +39,17 @@ export default class CoronaBusterScene extends Phaser.Scene {
         Phaser.Actions.RandomRectangle(this.clouds.getChildren(), this.physics.world.bounds);
         this.createButton();
         this.player = this.createPlayer();
-
+        this.enemies = this.physics.add.group({
+            classType: FallingObject,
+            maxSize: 10, //-----> banyaknya enemy dalam satu grup
+            runChildUpdate: true,
+        });
+        this.time.addEvent({
+            delay: Phaser.Math.Between(1000, 5000), //--------> Delay random  rentang 1-5 detik
+            callback: this.spawnEnemy,
+            callbackScope: this, //--------------------> Memanggil method bernama spawnEnemy
+            loop: true,
+        });
 
     }
     update(time) {
@@ -145,5 +159,18 @@ export default class CoronaBusterScene extends Phaser.Scene {
             }),
         });
         return player
+    }
+
+    spawnEnemy() {
+        const config = {
+            speed: 15, //-----------> Mengatur kecepatan dan besar rotasi dari enemy
+            rotation: 0.1
+        };
+        // @ts-ignore
+        const enemy = this.enemies.get(0, 0, 'enemy', config);
+        const positionX = Phaser.Math.Between(50, 350); //-----> Mengambil angka acak dari 50-350
+        if (enemy) {
+            enemy.spawn(positionX); //--------------> Memanggil method spawn dengan parameter nilai posisi sumbux
+        }
     }
 }
