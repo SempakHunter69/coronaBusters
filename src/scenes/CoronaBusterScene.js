@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import FallingObject from "./FallingObject";
+import FallingObject from "../ui/FallingObject";
+import Laser from "../ui/Laser";
 export default class CoronaBusterScene extends Phaser.Scene {
     constructor() {
         super("corona-buster-scene");
@@ -13,6 +14,8 @@ export default class CoronaBusterScene extends Phaser.Scene {
         this.speed = 100;
         this.enemies = undefined;
         this.enemySpeed = 50;
+        this.lasers = undefined;
+        this.lastFired = 10;
     }
 
     preload() {
@@ -26,6 +29,10 @@ export default class CoronaBusterScene extends Phaser.Scene {
             frameHeight: 66,
         });
         this.load.image('enemy', 'assets/enemy.png');
+        this.load.spritesheet("laser", "assets/laser-bolts.png", {
+            frameWidth: 16,
+            frameHeight: 16,
+        });
     }
     create() {
         const gameWidht = this.scale.width * 0.5;
@@ -50,6 +57,13 @@ export default class CoronaBusterScene extends Phaser.Scene {
             callbackScope: this, //--------------------> Memanggil method bernama spawnEnemy
             loop: true,
         });
+        this.lasers = this.physics.add.group({
+            classType: Laser,
+            maxSize: 10,
+            runChildUpdate: true,
+        });
+
+        this.physics.add.overlap(this.lasers, this.enemies, this.hitEnemy, null, this);
 
     }
     update(time) {
@@ -120,6 +134,7 @@ export default class CoronaBusterScene extends Phaser.Scene {
     }
 
     movePlayer(player, time) {
+
         if (this.nav_left) {
             player.setVelocityX(this.speed * -1);
             player.anims.play("left", true);
@@ -132,6 +147,16 @@ export default class CoronaBusterScene extends Phaser.Scene {
             player.setVelocityX(0);
             player.anims.play("turn");
         }
+
+        //above there’s codes for moving player
+        if (this.shoot && time > this.lastFired) {
+            const laser = this.lasers.get(0, 0, "laser");
+            if (laser) {
+                laser.fire(this.player.x, this.player.y);
+                this.lastFired = time + 150;
+            }
+        }
+
     }
 
     createPlayer() {
@@ -172,5 +197,10 @@ export default class CoronaBusterScene extends Phaser.Scene {
         if (enemy) {
             enemy.spawn(positionX); //--------------> Memanggil method spawn dengan parameter nilai posisi sumbux
         }
+    }
+
+    hitEnemy(laser, enemy) {
+        laser.die() //--------> Laser dan enemy dihancurkan 
+        enemy.die()
     }
 }
